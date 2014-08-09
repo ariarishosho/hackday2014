@@ -1,15 +1,21 @@
 package com.kabe.donhackday2014;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener {
+	Button ko;
+	Button arichi;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +26,13 @@ public class MainActivity extends Activity {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
+
+		// buttonを取得
+		ko = (Button) findViewById(R.id.button1);
+		ko.setOnClickListener(this);
+		// buttonを取得
+		arichi = (Button) findViewById(R.id.button2);
+		arichi.setOnClickListener(this);
 	}
 
 	@Override
@@ -57,6 +70,20 @@ public class MainActivity extends Activity {
 					false);
 			return rootView;
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if(v == ko){
+			Intent intent = new Intent(getApplicationContext(),MangaActivity.class);		
+			intent.setAction(Intent.ACTION_VIEW);
+			startActivity(intent);
+		}else if(v == arichi){
+			Intent intent = new Intent(getApplicationContext(),MangaActivity.class);		
+			intent.setAction(Intent.ACTION_VIEW);
+			startActivity(intent);
+		}
+
 	}
 
 }
