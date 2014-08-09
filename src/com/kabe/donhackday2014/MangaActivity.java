@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -39,6 +40,40 @@ public class MangaActivity extends Activity {
 		setContentView(mSurfaceView);
 	}
 
+	public  Bitmap resizeBitmapToDisplaySize( Bitmap src){
+        int srcWidth = src.getWidth(); // 元画像のwidth
+        int srcHeight = src.getHeight(); // 元画像のheight
+        Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
+                + " px, srcHeight = " + String.valueOf(srcHeight) + " px");
+ 
+        // 画面サイズを取得する
+        Matrix matrix = new Matrix();
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        float screenWidth = (float) metrics.widthPixels;
+        float screenHeight = (float) metrics.heightPixels;
+        Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
+                + " px, screenHeight = " + String.valueOf(screenHeight) + " px");
+ 
+        float widthScale = screenWidth / srcWidth;
+        float heightScale = screenHeight / srcHeight;
+        Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
+                + ", heightScale = " + String.valueOf(heightScale));
+        if (widthScale > heightScale) {
+            matrix.postScale(heightScale, heightScale);
+        } else {
+            matrix.postScale(widthScale, widthScale);
+        }
+        // リサイズ
+        Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight, matrix, true);
+        int dstWidth = dst.getWidth(); // 変更後画像のwidth
+        int dstHeight = dst.getHeight(); // 変更後画像のheight
+        Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
+                + " px, dstHeight = " + String.valueOf(dstHeight) + " px");
+        src = null;
+        return dst;
+    }
+	
 	class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback,
 			View.OnTouchListener {
 		private Bitmap mBitmap;
@@ -87,7 +122,7 @@ public class MangaActivity extends Activity {
 					mTranslationListener);
 			mRotationGestureDetector = new RotationGestureDetector(
 					mRotationListener);
-
+			mBackImage=resizeBitmapToDisplaySize (mBackImage);
 			getHolder().addCallback(this);
 			setOnTouchListener(this);
 		}
@@ -121,7 +156,7 @@ public class MangaActivity extends Activity {
 			mScaleGestureDetector.onTouchEvent(event);
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				mPaint.setAlpha(180);
+				mPaint.setAlpha(100);
 				break;
 			case MotionEvent.ACTION_UP:
 				mPaint.setAlpha(255);
@@ -217,4 +252,6 @@ public class MangaActivity extends Activity {
 			}
 		};
 	}
+	
+	
 }
