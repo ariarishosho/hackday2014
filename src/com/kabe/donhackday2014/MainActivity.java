@@ -75,7 +75,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		if(v == ko){
-			Intent intent = new Intent(getApplicationContext(),MangaActivity.class);		
+			Intent intent = new Intent(getApplicationContext(),TakePhotoActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
 		}else if(v == arichi){

@@ -1,17 +1,10 @@
 package com.kabe.donhackday2014;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ImageFormat;
@@ -22,11 +15,9 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Images;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -66,11 +57,11 @@ public class TakePhotoActivity extends Activity {
 		float heightScale = screenHeight / srcHeight;
 		Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
 				+ ", heightScale = " + String.valueOf(heightScale));
-		// if (widthScale > heightScale) {
-		// matrix.postScale(heightScale, heightScale);
-		// } else {
-		// matrix.postScale(widthScale, widthScale);
-		// }
+		if (widthScale > heightScale) {
+			matrix.postScale(heightScale, heightScale);
+		} else {
+			matrix.postScale(widthScale, widthScale);
+		}
 		// Bitmap dst = Bitmap.createBitmap(src, 0, 0, (int)screenWidth,
 		// (int)screenHeight,
 		// matrix, true);
@@ -88,8 +79,7 @@ public class TakePhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_takephoto);
-
-		mCam = Camera.open();
+		mCam = Camera.open(CameraInfo.CAMERA_FACING_BACK);
 		mCam.setDisplayOrientation(90);
 		mCam.setPreviewCallback(mPreviewCallback);
 		mCamView = new CameraWipeView(this, mCam);
@@ -99,7 +89,8 @@ public class TakePhotoActivity extends Activity {
 		mImageView = (ImageView) findViewById(R.id.image);
 		mMaskBitmap = resizeBitmapToDisplaySize(this,
 				BitmapFactory.decodeResource(getResources(),
-						R.drawable.face_mask));
+				// R.drawable.face_mask));
+						R.drawable.backlayer_mask));
 
 		mImageButton = (ImageButton) findViewById(R.id.imageButton);
 		mImageButton.setOnClickListener(new OnClickListener() {
@@ -107,10 +98,12 @@ public class TakePhotoActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				try {
-					takePhoto();
-					Toast.makeText(TakePhotoActivity.this, "撮影完了！", Toast.LENGTH_SHORT).show();
+					HackPhotoUtils.takePhoto(TakePhotoActivity.this, mResultBitmap);
+					Toast.makeText(TakePhotoActivity.this, "撮影完了！",
+							Toast.LENGTH_SHORT).show();
 				} catch (Exception e) {
-					Toast.makeText(TakePhotoActivity.this, "保存できない！！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TakePhotoActivity.this, "保存できない！！",
+							Toast.LENGTH_SHORT).show();
 
 				}
 			}
@@ -170,10 +163,11 @@ public class TakePhotoActivity extends Activity {
 	}
 
 	@Override
-	protected void onStop() {
+	protected void onPause() {
 		// TODO Auto-generated method stub
+		mCam.setPreviewCallback(null);
 		mCam.release();
-		super.onStop();
+		super.onPause();
 	}
 
 	@Override
@@ -181,48 +175,13 @@ public class TakePhotoActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onResume();
 		try {
-
+			Bitmap bm = HackPhotoUtils.getHackPhoto();
+			if (bm != null) {
+				mImageView.setImageBitmap(bm);
+			}
 			mCam.reconnect();
 		} catch (IOException e) {
 		}
 	}
 
-	private void takePhoto() throws IOException {
-
-		final String SAVE_DIR = "/MyPhoto/";
-		File file = new File(Environment.getExternalStorageDirectory()
-				.getPath() + SAVE_DIR);
-		try {
-			if (!file.exists()) {
-				file.mkdir();
-			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-			throw e;
-		}
-
-		Date mDate = new Date();
-		SimpleDateFormat fileNameDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String fileName = fileNameDate.format(mDate) + ".png";
-		String AttachName = file.getAbsolutePath() + "/" + fileName;
-
-		try {
-			FileOutputStream out = new FileOutputStream(AttachName);
-			mResultBitmap.compress(CompressFormat.PNG, 100, out);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		}
-
-		// save index
-		ContentValues values = new ContentValues();
-		ContentResolver contentResolver = getContentResolver();
-		values.put(Images.Media.MIME_TYPE, "image/png");
-		values.put(Images.Media.TITLE, fileName);
-		values.put("_data", AttachName);
-		contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-				values);
-	}
 }
