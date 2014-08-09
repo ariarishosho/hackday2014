@@ -243,7 +243,7 @@ public class TakePhotoActivity extends Activity {
 
 	private MediaPlayer mMediaPlayer;
 	private final int SOUND_READY = R.raw.ta_ge_doramu_s01;
-	private final int SOUND_SHOOT = R.raw.kyaa1;
+	private final int SOUND_SHOOT = R.raw.katanochikara;
 	private final int SOUND_SHUTTER = R.raw.se_033a;
 
 	/**

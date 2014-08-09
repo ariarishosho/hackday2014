@@ -23,8 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:src="@drawable/face_yoko" />
-
+         android:src="@drawable/face_yoko" />
     <ImageView
         android:id="@+id/imageButton"
         android:layout_width="70dp"
