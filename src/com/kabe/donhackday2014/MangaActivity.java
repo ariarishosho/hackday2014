@@ -1,7 +1,9 @@
 package com.kabe.donhackday2014;
 
+import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,69 +13,97 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
 import com.kabe.donhackday2014Gesture.RotationGestureDetector;
 import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
 import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
-public class MangaActivity extends Activity {
+public class MangaActivity extends Activity implements OnClickListener {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
-	ImageView dragView;
+	Button button;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.activity_manga);
+		// LayoutParamsにセットするパラメータを準備
+		final int FP = ViewGroup.LayoutParams.FILL_PARENT;
+		final int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
+		// 　FrameLayoutを準備
+		FrameLayout fl = new FrameLayout(this);
+		setContentView(fl);
+
 		mSurfaceView = new MySurfaceView(getApplicationContext());
-		setContentView(mSurfaceView);
+		fl.addView(mSurfaceView, new ViewGroup.LayoutParams(WC, WC));
+
+//		button = new Button(this);
+//		button.setText("カメラ");
+//		LayoutParams lp1 = new LayoutParams(LayoutParams.WRAP_CONTENT,
+//				LayoutParams.WRAP_CONTENT);
+//		button.setGravity(Gravity.LEFT);
+//		fl.addView(button, lp1);
 	}
 
-	public  Bitmap resizeBitmapToDisplaySize( Bitmap src){
-        int srcWidth = src.getWidth(); // 元画像のwidth
-        int srcHeight = src.getHeight(); // 元画像のheight
-        Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
-                + " px, srcHeight = " + String.valueOf(srcHeight) + " px");
- 
-        // 画面サイズを取得する
-        Matrix matrix = new Matrix();
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        float screenWidth = (float) metrics.widthPixels;
-        float screenHeight = (float) metrics.heightPixels;
-        Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
-                + " px, screenHeight = " + String.valueOf(screenHeight) + " px");
- 
-        float widthScale = screenWidth / srcWidth;
-        float heightScale = screenHeight / srcHeight;
-        Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
-                + ", heightScale = " + String.valueOf(heightScale));
-        if (widthScale > heightScale) {
-            matrix.postScale(heightScale, heightScale);
-        } else {
-            matrix.postScale(widthScale, widthScale);
-        }
-        // リサイズ
-        Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight, matrix, true);
-        int dstWidth = dst.getWidth(); // 変更後画像のwidth
-        int dstHeight = dst.getHeight(); // 変更後画像のheight
-        Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
-                + " px, dstHeight = " + String.valueOf(dstHeight) + " px");
-        src = null;
-        return dst;
-    }
-	
+	@Override
+	public void onClick(View v) {
+		if (v == button) {
+			Intent intent = new Intent(getApplicationContext(),
+					TakePhotoActivity.class);
+			intent.setAction(Intent.ACTION_VIEW);
+			startActivity(intent);
+		}
+	}
+
+	public Bitmap resizeBitmapToDisplaySize(Bitmap src) {
+		int srcWidth = src.getWidth(); // 元画像のwidth
+		int srcHeight = src.getHeight(); // 元画像のheight
+		Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
+				+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
+
+		// 画面サイズを取得する
+		Matrix matrix = new Matrix();
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		float screenWidth = (float) metrics.widthPixels;
+		float screenHeight = (float) metrics.heightPixels;
+		Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
+				+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
+
+		float widthScale = screenWidth / srcWidth;
+		float heightScale = screenHeight / srcHeight;
+		Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
+				+ ", heightScale = " + String.valueOf(heightScale));
+		if (widthScale > heightScale) {
+			matrix.postScale(heightScale, heightScale);
+		} else {
+			matrix.postScale(widthScale, widthScale);
+		}
+		// リサイズ
+		Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
+				matrix, true);
+		int dstWidth = dst.getWidth(); // 変更後画像のwidth
+		int dstHeight = dst.getHeight(); // 変更後画像のheight
+		Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
+				+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
+		src = null;
+		return dst;
+	}
+
 	class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback,
 			View.OnTouchListener {
 		private Bitmap mBitmap;
@@ -98,8 +128,8 @@ public class MangaActivity extends Activity {
 			try {
 				// is = manager.open("test.png");
 				// mBitmap = BitmapFactory.decodeStream(is);
-				mBitmap = BitmapFactory.decodeResource(getResources(),
-						R.drawable.hitolayer);
+				mBitmap =
+						HackPhotoUtils.getHackPhoto();
 				mBackImage = BitmapFactory.decodeResource(getResources(),
 						R.drawable.backlayer);
 
@@ -122,7 +152,7 @@ public class MangaActivity extends Activity {
 					mTranslationListener);
 			mRotationGestureDetector = new RotationGestureDetector(
 					mRotationListener);
-			mBackImage=resizeBitmapToDisplaySize (mBackImage);
+			mBackImage = resizeBitmapToDisplaySize(mBackImage);
 			getHolder().addCallback(this);
 			setOnTouchListener(this);
 		}
@@ -252,6 +282,5 @@ public class MangaActivity extends Activity {
 			}
 		};
 	}
-	
-	
+
 }
