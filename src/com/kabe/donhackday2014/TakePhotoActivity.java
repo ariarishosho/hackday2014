@@ -1,6 +1,7 @@
 package com.kabe.donhackday2014;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -14,12 +15,17 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.kabe.donhackday2014.view.CameraWipeView;
 
@@ -30,14 +36,15 @@ public class TakePhotoActivity extends Activity {
 	private CameraWipeView mCamView;
 	private FrameLayout mFrame;
 	private Bitmap mMaskBitmap;
+	private Bitmap mResultBitmap;
+	private ImageButton mImageButton;
 
 	public static Bitmap resizeBitmapToDisplaySize(Activity activity, Bitmap src) {
-		int srcWidth = src.getWidth(); // å≥âÊëúÇÃwidth
-		int srcHeight = src.getHeight(); // å≥âÊëúÇÃheight
+		int srcWidth = src.getWidth();
+		int srcHeight = src.getHeight();
 		Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
 				+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
 
-		// âÊñ ÉTÉCÉYÇéÊìæÇ∑ÇÈ
 		Matrix matrix = new Matrix();
 		DisplayMetrics metrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -55,11 +62,13 @@ public class TakePhotoActivity extends Activity {
 		} else {
 			matrix.postScale(widthScale, widthScale);
 		}
-		// ÉäÉTÉCÉY
+		// Bitmap dst = Bitmap.createBitmap(src, 0, 0, (int)screenWidth,
+		// (int)screenHeight,
+		// matrix, true);
 		Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
 				matrix, true);
-		int dstWidth = dst.getWidth(); // ïœçXå„âÊëúÇÃwidth
-		int dstHeight = dst.getHeight(); // ïœçXå„âÊëúÇÃheight
+		int dstWidth = dst.getWidth();
+		int dstHeight = dst.getHeight();
 		Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
 				+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
 		src = null;
@@ -70,8 +79,7 @@ public class TakePhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_takephoto);
-
-		mCam = Camera.open();
+		mCam = Camera.open(CameraInfo.CAMERA_FACING_BACK);
 		mCam.setDisplayOrientation(90);
 		mCam.setPreviewCallback(mPreviewCallback);
 		mCamView = new CameraWipeView(this, mCam);
@@ -81,23 +89,47 @@ public class TakePhotoActivity extends Activity {
 		mImageView = (ImageView) findViewById(R.id.image);
 		mMaskBitmap = resizeBitmapToDisplaySize(this,
 				BitmapFactory.decodeResource(getResources(),
-						R.drawable.face_mask));
+				// R.drawable.face_mask));
+						R.drawable.backlayer_mask));
+
+		mImageButton = (ImageButton) findViewById(R.id.imageButton);
+		mImageButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				try {
+					HackPhotoUtils.takePhoto(TakePhotoActivity.this, mResultBitmap);
+					Toast.makeText(TakePhotoActivity.this, "ÊíÆÂΩ±ÂÆå‰∫ÜÔºÅ",
+							Toast.LENGTH_SHORT).show();
+				} catch (Exception e) {
+					Toast.makeText(TakePhotoActivity.this, "‰øùÂ≠ò„Åß„Åç„Å™„ÅÑÔºÅÔºÅ",
+							Toast.LENGTH_SHORT).show();
+
+				}
+			}
+		});
 
 	}
 
 	private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
 		@Override
 		public void onPreviewFrame(byte[] data, Camera camera) {
-			// ì«Ç›çûÇﬁîÕàÕ
 			int previewWidth = camera.getParameters().getPreviewSize().width;
 			int previewHeight = camera.getParameters().getPreviewSize().height;
-			// ÉvÉåÉrÉÖÅ[ÉfÅ[É^Ç©ÇÁ Bitmap Çê∂ê¨
 			Bitmap bmp = getBitmapImageFromYUV(data, previewWidth,
 					previewHeight);
+			bmp = rotateBitmap(bmp, 90);
 			maskAndSetImage(bmp, mMaskBitmap);
 
 		}
 	};
+
+	public static Bitmap rotateBitmap(Bitmap source, float angle) {
+		Matrix matrix = new Matrix();
+		matrix.postRotate(angle);
+		return Bitmap.createBitmap(source, 0, 0, source.getWidth(),
+				source.getHeight(), matrix, true);
+	}
 
 	public static final String TAG = "TakePhotoActivity";
 
@@ -115,24 +147,26 @@ public class TakePhotoActivity extends Activity {
 	}
 
 	private void maskAndSetImage(Bitmap original, Bitmap mask) {
-		Bitmap result = Bitmap.createBitmap(original.getWidth(),
-				original.getHeight(), Bitmap.Config.ARGB_8888);
+		mResultBitmap = Bitmap.createBitmap(mask.getWidth(), mask.getHeight(),
+				Bitmap.Config.ARGB_8888);
 		// Bitmap result = Bitmap.createBitmap(mask.getWidth(),
 		// mask.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas mCanvas = new Canvas(result);
+		Canvas mCanvas = new Canvas(mResultBitmap);
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
 		mCanvas.drawBitmap(original, 0, 0, null);
 		mCanvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
-		mImageView.setImageBitmap(result);
-		mImageView.setScaleType(ImageView.ScaleType.CENTER);
+		mImageView.setImageBitmap(mResultBitmap);
+		// mImageView.setScaleType(ImageView.ScaleType.CENTER);
 		mImageView.setBackgroundResource(R.drawable.ic_launcher);
 	}
 
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
+		mCam.setPreviewCallback(null);
+		mCam.release();
 		super.onPause();
 	}
 
@@ -140,6 +174,14 @@ public class TakePhotoActivity extends Activity {
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
+		try {
+			Bitmap bm = HackPhotoUtils.getHackPhoto();
+			if (bm != null) {
+				mImageView.setImageBitmap(bm);
+			}
+			mCam.reconnect();
+		} catch (IOException e) {
+		}
 	}
 
 }
