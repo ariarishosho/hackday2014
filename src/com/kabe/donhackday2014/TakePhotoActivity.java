@@ -32,12 +32,11 @@ public class TakePhotoActivity extends Activity {
 	private Bitmap mMaskBitmap;
 
 	public static Bitmap resizeBitmapToDisplaySize(Activity activity, Bitmap src) {
-		int srcWidth = src.getWidth(); // 元画像のwidth
-		int srcHeight = src.getHeight(); // 元画像のheight
+		int srcWidth = src.getWidth();
+		int srcHeight = src.getHeight();
 		Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
 				+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
 
-		// 画面サイズを取得する
 		Matrix matrix = new Matrix();
 		DisplayMetrics metrics = new DisplayMetrics();
 		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -50,16 +49,18 @@ public class TakePhotoActivity extends Activity {
 		float heightScale = screenHeight / srcHeight;
 		Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
 				+ ", heightScale = " + String.valueOf(heightScale));
-		if (widthScale > heightScale) {
-			matrix.postScale(heightScale, heightScale);
-		} else {
-			matrix.postScale(widthScale, widthScale);
-		}
-		// リサイズ
+		// if (widthScale > heightScale) {
+		// matrix.postScale(heightScale, heightScale);
+		// } else {
+		// matrix.postScale(widthScale, widthScale);
+		// }
+		// Bitmap dst = Bitmap.createBitmap(src, 0, 0, (int)screenWidth,
+		// (int)screenHeight,
+		// matrix, true);
 		Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
 				matrix, true);
-		int dstWidth = dst.getWidth(); // 変更後画像のwidth
-		int dstHeight = dst.getHeight(); // 変更後画像のheight
+		int dstWidth = dst.getWidth();
+		int dstHeight = dst.getHeight();
 		Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
 				+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
 		src = null;
@@ -88,16 +89,22 @@ public class TakePhotoActivity extends Activity {
 	private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
 		@Override
 		public void onPreviewFrame(byte[] data, Camera camera) {
-			// 読み込む範囲
 			int previewWidth = camera.getParameters().getPreviewSize().width;
 			int previewHeight = camera.getParameters().getPreviewSize().height;
-			// プレビューデータから Bitmap を生成
 			Bitmap bmp = getBitmapImageFromYUV(data, previewWidth,
 					previewHeight);
+			bmp = rotateBitmap(bmp, 90);
 			maskAndSetImage(bmp, mMaskBitmap);
 
 		}
 	};
+
+	public static Bitmap rotateBitmap(Bitmap source, float angle) {
+		Matrix matrix = new Matrix();
+		matrix.postRotate(angle);
+		return Bitmap.createBitmap(source, 0, 0, source.getWidth(),
+				source.getHeight(), matrix, true);
+	}
 
 	public static final String TAG = "TakePhotoActivity";
 
@@ -115,8 +122,8 @@ public class TakePhotoActivity extends Activity {
 	}
 
 	private void maskAndSetImage(Bitmap original, Bitmap mask) {
-		Bitmap result = Bitmap.createBitmap(original.getWidth(),
-				original.getHeight(), Bitmap.Config.ARGB_8888);
+		Bitmap result = Bitmap.createBitmap(mask.getWidth(), mask.getHeight(),
+				Bitmap.Config.ARGB_8888);
 		// Bitmap result = Bitmap.createBitmap(mask.getWidth(),
 		// mask.getHeight(), Bitmap.Config.ARGB_8888);
 		Canvas mCanvas = new Canvas(result);
@@ -126,7 +133,7 @@ public class TakePhotoActivity extends Activity {
 		mCanvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
 		mImageView.setImageBitmap(result);
-		mImageView.setScaleType(ImageView.ScaleType.CENTER);
+		// mImageView.setScaleType(ImageView.ScaleType.CENTER);
 		mImageView.setBackgroundResource(R.drawable.ic_launcher);
 	}
 
