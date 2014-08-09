@@ -16,6 +16,10 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -38,6 +42,39 @@ public class TakePhotoActivity extends Activity {
 	private Bitmap mMaskBitmap;
 	private Bitmap mResultBitmap;
 	private ImageButton mImageButton;
+
+	public static Bitmap resizeBitmapToDisplaySize(Activity activity,
+			Bitmap src, float toWidth, float toHeight) {
+		int srcWidth = src.getWidth();
+		int srcHeight = src.getHeight();
+		Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
+				+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
+
+		Matrix matrix = new Matrix();
+		DisplayMetrics metrics = new DisplayMetrics();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		float widthScale = toWidth / srcWidth;
+		float heightScale = toHeight / srcHeight;
+		Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
+				+ ", heightScale = " + String.valueOf(heightScale));
+		if (widthScale > heightScale) {
+			matrix.postScale(heightScale, heightScale);
+		} else {
+			matrix.postScale(widthScale, widthScale);
+		}
+		// Bitmap dst = Bitmap.createBitmap(src, 0, 0, (int)screenWidth,
+		// (int)screenHeight,
+		// matrix, true);
+		Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
+				matrix, true);
+		int dstWidth = dst.getWidth();
+		int dstHeight = dst.getHeight();
+		Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
+				+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
+		src = null;
+		return dst;
+	}
 
 	public static Bitmap resizeBitmapToDisplaySize(Activity activity, Bitmap src) {
 		int srcWidth = src.getWidth();
@@ -79,33 +116,28 @@ public class TakePhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_takephoto);
+		getActionBar().hide();
 		mCam = Camera.open(CameraInfo.CAMERA_FACING_BACK);
 		mCam.setDisplayOrientation(90);
-		mCam.setPreviewCallback(mPreviewCallback);
+		// mCam.setPreviewCallback(mPreviewCallback);
 		mCamView = new CameraWipeView(this, mCam);
 		mFrame = (FrameLayout) findViewById(R.id.frame);
 		mFrame.addView(mCamView);
 
 		mImageView = (ImageView) findViewById(R.id.image);
-		mMaskBitmap = resizeBitmapToDisplaySize(this,
-				BitmapFactory.decodeResource(getResources(),
-				// R.drawable.face_mask));
-						R.drawable.backlayer_mask));
+		// mMaskBitmap = resizeBitmapToDisplaySize(this,
+		// BitmapFactory.decodeResource(getResources(),
+		// R.drawable.face_yoko_mask));
+
+		// R.drawable.backlayer_mask));
 
 		mImageButton = (ImageButton) findViewById(R.id.imageButton);
 		mImageButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				try {
-					HackPhotoUtils.takePhoto(TakePhotoActivity.this, mResultBitmap);
-					Toast.makeText(TakePhotoActivity.this, "撮影完了！",
-							Toast.LENGTH_SHORT).show();
-				} catch (Exception e) {
-					Toast.makeText(TakePhotoActivity.this, "保存できない！！",
-							Toast.LENGTH_SHORT).show();
+				playFromMediaPlayer(SOUND_SHOOT, mShootCompletionListener);
 
-				}
 			}
 		});
 
@@ -119,7 +151,11 @@ public class TakePhotoActivity extends Activity {
 			Bitmap bmp = getBitmapImageFromYUV(data, previewWidth,
 					previewHeight);
 			bmp = rotateBitmap(bmp, 90);
-			maskAndSetImage(bmp, mMaskBitmap);
+			try {
+				maskAndSetImage(bmp, mMaskBitmap);
+			} catch (IOException e) {
+				return;
+			}
 
 		}
 	};
@@ -146,27 +182,43 @@ public class TakePhotoActivity extends Activity {
 		return bmp;
 	}
 
-	private void maskAndSetImage(Bitmap original, Bitmap mask) {
+	private void maskAndSetImage(Bitmap original, Bitmap mask)
+			throws IOException {
 		mResultBitmap = Bitmap.createBitmap(mask.getWidth(), mask.getHeight(),
 				Bitmap.Config.ARGB_8888);
-		// Bitmap result = Bitmap.createBitmap(mask.getWidth(),
-		// mask.getHeight(), Bitmap.Config.ARGB_8888);
 		Canvas mCanvas = new Canvas(mResultBitmap);
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
 		mCanvas.drawBitmap(original, 0, 0, null);
 		mCanvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
-		mImageView.setImageBitmap(mResultBitmap);
-		// mImageView.setScaleType(ImageView.ScaleType.CENTER);
-		mImageView.setBackgroundResource(R.drawable.ic_launcher);
+		// mImageView.setImageBitmap(mResultBitmap);
+		HackPhotoUtils.takePhoto(this, mResultBitmap);
 	}
+
+	//
+	// private void maskAndSetImage(Bitmap original, Bitmap mask) {
+	// mResultBitmap = Bitmap.createBitmap(mask.getWidth(), mask.getHeight(),
+	// Bitmap.Config.ARGB_8888);
+	// // Bitmap result = Bitmap.createBitmap(mask.getWidth(),
+	// // mask.getHeight(), Bitmap.Config.ARGB_8888);
+	// Canvas mCanvas = new Canvas(mResultBitmap);
+	// Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	// paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+	// mCanvas.drawBitmap(original, 0, 0, null);
+	// mCanvas.drawBitmap(mask, 0, 0, paint);
+	// paint.setXfermode(null);
+	// mImageView.setImageBitmap(mResultBitmap);
+	// // mImageView.setScaleType(ImageView.ScaleType.CENTER);
+	// // mImageView.setBackgroundResource(R.drawable.ic_launcher);
+	// }
 
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		mCam.setPreviewCallback(null);
 		mCam.release();
+		stopMediaPlayer();
 		super.onPause();
 	}
 
@@ -182,6 +234,96 @@ public class TakePhotoActivity extends Activity {
 			mCam.reconnect();
 		} catch (IOException e) {
 		}
+		// playFromMediaPlayer(SOUND_READY);
 	}
 
+	private MediaPlayer mMediaPlayer;
+	private final int SOUND_READY = R.raw.ta_ge_doramu_s01;
+	private final int SOUND_SHOOT = R.raw.kyaa1;
+	private final int SOUND_SHUTTER = R.raw.se_033a;
+
+	/**
+	 * 写真プレビュー表示時は機能しない
+	 */
+	private void playFromMediaPlayer(int sound, OnCompletionListener listener) {
+		if (mMediaPlayer != null) {
+			stopMediaPlayer();
+		}
+		mMediaPlayer = MediaPlayer.create(getApplicationContext(), sound);
+		// mMediaPlayer.setLooping(true); // ループ設定
+		mMediaPlayer.seekTo(0); // 再生位置を0ミリ秒に指定
+		mMediaCompleted = true;
+		if (listener != null) {
+			mMediaPlayer.setOnCompletionListener(listener);
+		}
+		mMediaPlayer.start();
+	}
+
+	private void stopMediaPlayer() {
+		mMediaPlayer.stop();
+	}
+
+	private boolean mMediaCompleted = false;
+
+	private OnCompletionListener mShootCompletionListener = new OnCompletionListener() {
+
+		@Override
+		public void onCompletion(MediaPlayer mp) {
+			mMediaCompleted = true;
+			try {
+				takePhoto2();
+				// HackPhotoUtils.takePhoto(TakePhotoActivity.this,
+				// mResultBitmap);
+				Toast.makeText(TakePhotoActivity.this, "撮影完了！",
+						Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				Toast.makeText(TakePhotoActivity.this, "保存できない！！",
+						Toast.LENGTH_SHORT).show();
+			}
+
+		}
+	};
+
+	private void takePhoto2() {
+		mCam.takePicture(mShutterCallback, null, mPictureCallback);
+	}
+
+	private PictureCallback mPictureCallback = new PictureCallback() {
+		@Override
+		public void onPictureTaken(byte[] data, Camera camera) {
+			if (data != null) {
+				mResultBitmap = BitmapFactory.decodeByteArray(data, 0,
+						data.length);
+				Matrix m = new Matrix();
+				m.postRotate(90);
+				mResultBitmap = Bitmap.createBitmap(mResultBitmap, 0, 0,
+						mResultBitmap.getWidth(), mResultBitmap.getHeight(), m,
+						true);
+
+				mMaskBitmap = resizeBitmapToDisplaySize(TakePhotoActivity.this,
+						BitmapFactory.decodeResource(getResources(),
+								R.drawable.face_yoko_mask), mResultBitmap.getWidth(), mResultBitmap.getHeight());
+
+				try {
+					maskAndSetImage(mResultBitmap, mMaskBitmap);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+	private ShutterCallback mShutterCallback = new ShutterCallback() {
+		@Override
+		public void onShutter() {
+			playFromMediaPlayer(SOUND_SHUTTER, null);
+		}
+	};
+
+	private OnCompletionListener mCompletionListener = new OnCompletionListener() {
+
+		@Override
+		public void onCompletion(MediaPlayer mp) {
+			mMediaCompleted = true;
+		}
+	};
 }
