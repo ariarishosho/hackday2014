@@ -16,7 +16,7 @@ import android.widget.Button;
 public class MainActivity extends Activity implements OnClickListener {
 	Button ko;
 	Button arichi;
-
+	Button  ges;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
