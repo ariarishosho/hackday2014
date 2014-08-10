@@ -10,11 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 public class MainActivity extends Activity implements OnClickListener {
-	Button arichi;
-	Button  ges;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -27,9 +24,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		// buttonを取得
 		findViewById(R.id.imageCamera).setOnClickListener(this);
-		// buttonを取得
-		arichi = (Button) findViewById(R.id.button2);
-		arichi.setOnClickListener(this);
+		findViewById(R.id.linearManga).setOnClickListener(this);
 	}
 
 	@Override
@@ -71,21 +66,18 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if(v.getId() == R.id.imageCamera){
+		switch(v.getId()) {
+		case R.id.imageCamera:
 			Intent intent = new Intent(getApplicationContext(),TakePhotoActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
-			return;
-		}else if(v == arichi){
-			Intent intent = new Intent(getApplicationContext(), PagerActivity.class);		
+			break;
+		case R.id.linearManga:
+			intent = new Intent(getApplicationContext(), PagerActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
+			break;
 		}
-//		else if(v == ko2){
-//			Intent intent = new Intent(getApplicationContext(), SlideMangaActivity.class);		
-//			intent.setAction(Intent.ACTION_VIEW);
-//			startActivity(intent);
-//		}
 	}
 
 }

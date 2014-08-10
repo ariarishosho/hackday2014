@@ -19,7 +19,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="ときめきカメラ" />
-        -->
 
         <Button
             android:id="@+id/button2"
@@ -27,7 +26,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="ドキドキ" />
-        <!--
         <Button
             android:id="@+id/button3"
             android:layout_width="wrap_content"
@@ -117,14 +115,18 @@
                     android:paddingTop="5dp"
                     android:text="めいを守るためとキスまでしてきて･･････!?大人気、リアル初恋ストーリー!!"
                     android:textColor="#999"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="left"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="5dp"
+                    android:scaleType="fitStart"
                     android:src="@drawable/btn_read" />
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
