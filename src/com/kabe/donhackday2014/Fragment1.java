@@ -21,242 +21,253 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.kabe.donhackday2014.MangaActivity.MySurfaceView;
 import com.kabe.donhackday2014Gesture.RotationGestureDetector;
 import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
 import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
-
-
-public class Fragment1 extends Fragment {
+public class Fragment1  extends Fragment {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
 	Button button;
 
-	  @Override
-	  public View onCreateView(LayoutInflater inflater,
-	    ViewGroup container,
-	    Bundle savedInstanceState) {
-	    return new MySurfaceView(getActivity().getApplicationContext());
-	  }
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		return new MySurfaceView(getActivity().getApplicationContext());
+	}
 
-		public Bitmap resizeBitmapToDisplaySize(Bitmap src) {
-			int srcWidth = src.getWidth(); // 元画像のwidth
-			int srcHeight = src.getHeight(); // 元画像のheight
-			Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
-					+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
+	public Bitmap resizeBitmapToDisplaySize(Bitmap src) {
+		int srcWidth = src.getWidth(); // 元画像のwidth
+		int srcHeight = src.getHeight(); // 元画像のheight
+		Log.d(TAG, "srcWidth = " + String.valueOf(srcWidth)
+				+ " px, srcHeight = " + String.valueOf(srcHeight) + " px");
 
-			// 画面サイズを取得する
-			Matrix matrix = new Matrix();
-			DisplayMetrics metrics = new DisplayMetrics();
-			getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			float screenWidth = (float) metrics.widthPixels;
-			float screenHeight = (float) metrics.heightPixels;
-			Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
-					+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
+		// 画面サイズを取得する
+		Matrix matrix = new Matrix();
+		DisplayMetrics metrics = new DisplayMetrics();
+		getActivity().getWindowManager().getDefaultDisplay()
+				.getMetrics(metrics);
+		float screenWidth = (float) metrics.widthPixels;
+		float screenHeight = (float) metrics.heightPixels;
+		Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
+				+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
 
-			float widthScale = screenWidth / srcWidth;
-			float heightScale = screenHeight / srcHeight;
-			Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
-					+ ", heightScale = " + String.valueOf(heightScale));
-			if (widthScale > heightScale) {
-				matrix.postScale(heightScale, heightScale);
-			} else {
-				matrix.postScale(widthScale, widthScale);
+		float widthScale = screenWidth / srcWidth;
+		float heightScale = screenHeight / srcHeight;
+		Log.d(TAG, "widthScale = " + String.valueOf(widthScale)
+				+ ", heightScale = " + String.valueOf(heightScale));
+		if (widthScale > heightScale) {
+			matrix.postScale(heightScale, heightScale);
+		} else {
+			matrix.postScale(widthScale, widthScale);
+		}
+		// リサイズ
+		Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
+				matrix, true);
+		int dstWidth = dst.getWidth(); // 変更後画像のwidth
+		int dstHeight = dst.getHeight(); // 変更後画像のheight
+		Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
+				+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
+		src = null;
+		return dst;
+	}
+
+	class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback,
+			View.OnTouchListener {
+		private Bitmap mBitmap;
+		private Bitmap mBackImage;
+		private Bitmap mEditImage;
+		private SurfaceHolder mHolder;
+		private Matrix mMatrix;
+		private Paint mPaint;
+		private Paint mEditPaint;
+		private float mScale;
+		private float mTranslateX, mTranslateY;
+		private float mAngle;
+
+		private RotationGestureDetector mRotationGestureDetector;
+		private TranslationGestureDetector mTranslationGestureDetector;
+		private ScaleGestureDetector mScaleGestureDetector;
+
+		public MySurfaceView(Context context) {
+			super(context);
+
+			// 画像を読み込み( カメラ側で保存したもの)
+			// AssetManager manager = getAssets();
+			// InputStream is = null;
+			try {
+				// is = manager.open("test.png");
+				// mBitmap = BitmapFactory.decodeStream(is);
+				mBitmap = HackPhotoUtils.getHackPhoto();
+				mBackImage = BitmapFactory.decodeResource(getResources(),
+						R.drawable.majichu02);
+				mEditImage = BitmapFactory.decodeResource(getResources(),
+						R.drawable.edit);
+			} catch (Exception e) {
+			} finally {
+				// try {
+				// is.close();
+				// } catch (IOException e) {
+				// }
 			}
-			// リサイズ
-			Bitmap dst = Bitmap.createBitmap(src, 0, 0, srcWidth, srcHeight,
-					matrix, true);
-			int dstWidth = dst.getWidth(); // 変更後画像のwidth
-			int dstHeight = dst.getHeight(); // 変更後画像のheight
-			Log.d(TAG, "dstWidth = " + String.valueOf(dstWidth)
-					+ " px, dstHeight = " + String.valueOf(dstHeight) + " px");
-			src = null;
-			return dst;
-		}
-	  class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback,
-		View.OnTouchListener {
-	private Bitmap mBitmap;
-	private Bitmap mBackImage;
-	private SurfaceHolder mHolder;
-	private Matrix mMatrix;
-	private Paint mPaint;
-	private float mScale;
-	private float mTranslateX, mTranslateY;
-	private float mAngle;
 
-	private RotationGestureDetector mRotationGestureDetector;
-	private TranslationGestureDetector mTranslationGestureDetector;
-	private ScaleGestureDetector mScaleGestureDetector;
+			// ジェスチャー用の変数初期化
+			mMatrix = new Matrix();
+			mPaint = new Paint();
+			mEditPaint = new Paint();
+			mScale = 1.0f;
 
-	public MySurfaceView(Context context) {
-		super(context);
+			mScaleGestureDetector = new ScaleGestureDetector(context,
+					mOnScaleListener);
+			mTranslationGestureDetector = new TranslationGestureDetector(
+					mTranslationListener);
+			mRotationGestureDetector = new RotationGestureDetector(
+					mRotationListener);
+			mBackImage = resizeBitmapToDisplaySize(mBackImage);
 
-		// 画像を読み込み( カメラ側で保存したもの)
-		// AssetManager manager = getAssets();
-		// InputStream is = null;
-		try {
-			// is = manager.open("test.png");
-			// mBitmap = BitmapFactory.decodeStream(is);
-			mBitmap =
-					HackPhotoUtils.getHackPhoto();
-			mBackImage = BitmapFactory.decodeResource(getResources(),
-					R.drawable.majichu02);
-	
-		} catch (Exception e) {
-		} finally {
-			// try {
-			// is.close();
-			// } catch (IOException e) {
-			// }
-		}
-
-		// ジェスチャー用の変数初期化
-		mMatrix = new Matrix();
-		mPaint = new Paint();
-		mScale = 1.0f;
-
-		mScaleGestureDetector = new ScaleGestureDetector(context,
-				mOnScaleListener);
-		mTranslationGestureDetector = new TranslationGestureDetector(
-				mTranslationListener);
-		mRotationGestureDetector = new RotationGestureDetector(
-				mRotationListener);
-		mBackImage = resizeBitmapToDisplaySize(mBackImage);
-		getHolder().addCallback(this);
-		setOnTouchListener(this);
-	}
-
-	
-	
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		mHolder = holder;
-
-		mTranslateX = width / 2;
-		mTranslateY = height / 2;
-
-		present();
-	}
-
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-	}
-
-	/**
-	 * タッチ処理
-	 */
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		mRotationGestureDetector.onTouchEvent(event);
-		mTranslationGestureDetector.onTouch(event);
-		mScaleGestureDetector.onTouchEvent(event);
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_DOWN:
-			mPaint.setAlpha(100);
-			break;
-		case MotionEvent.ACTION_UP:
-			mPaint.setAlpha(255);
-			break;
-		}
-
-		present();
-		return true;
-	}
-
-	/**
-	 * 描画する。
-	 */
-	public void present() {
-		Canvas canvas = mHolder.lockCanvas();
-
-		mMatrix.reset();
-		mMatrix.postScale(mScale, mScale);
-		mMatrix.postTranslate(-mBitmap.getWidth() / 2 * mScale,
-				-mBitmap.getHeight() / 2 * mScale);
-		mMatrix.postRotate(mAngle);
-		mMatrix.postTranslate(mTranslateX, mTranslateY);
-
-		canvas.drawColor(Color.BLACK);
-		canvas.drawBitmap(mBitmap, mMatrix, null);
-		canvas.drawBitmap(mBackImage, 0, 0, mPaint);
-		mHolder.unlockCanvasAndPost(canvas);
-	}
-
-	/**
-	 * 拡大縮小処理
-	 */
-	private SimpleOnScaleGestureListener mOnScaleListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-		@Override
-		public boolean onScaleBegin(ScaleGestureDetector detector) {
-			Log.i(TAG, "scale begin");
-			return super.onScaleBegin(detector);
+			getHolder().addCallback(this);
+			setOnTouchListener(this);
 		}
 
 		@Override
-		public void onScaleEnd(ScaleGestureDetector detector) {
-			Log.i(TAG, "scale end");
-			super.onScaleEnd(detector);
+		public void surfaceChanged(SurfaceHolder holder, int format, int width,
+				int height) {
+			mHolder = holder;
+			mTranslateX = width / 2;
+			mTranslateY = height / 2;
+			present();
 		}
 
 		@Override
-		public boolean onScale(ScaleGestureDetector detector) {
-			mScale *= detector.getScaleFactor();
+		public void surfaceCreated(SurfaceHolder holder) {
+		}
+
+		@Override
+		public void surfaceDestroyed(SurfaceHolder holder) {
+		}
+
+		boolean edit = false;
+
+		/**
+		 * タッチ処理
+		 */
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getX() < 200 && event.getY() < 100) {
+				if (edit) {
+					edit = false;
+					mEditPaint.setAlpha(255);
+				} else {
+					edit = true;
+					mEditPaint.setAlpha(80);
+				}
+			} else if (edit) {
+				mRotationGestureDetector.onTouchEvent(event);
+				mTranslationGestureDetector.onTouch(event);
+				mScaleGestureDetector.onTouchEvent(event);
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					mPaint.setAlpha(100);
+					break;
+				case MotionEvent.ACTION_UP:
+					mPaint.setAlpha(255);
+					break;
+
+				}
+			}
+			present();
 			return true;
+		}
+
+		/**
+		 * 描画する。
+		 */
+		public void present() {
+			Canvas canvas = mHolder.lockCanvas();
+
+			mMatrix.reset();
+			mMatrix.postScale(mScale, mScale);
+			mMatrix.postTranslate(-mBitmap.getWidth() / 2 * mScale,
+					-mBitmap.getHeight() / 2 * mScale);
+			mMatrix.postRotate(mAngle);
+			mMatrix.postTranslate(mTranslateX, mTranslateY);
+
+			canvas.drawColor(Color.BLACK);
+			canvas.drawBitmap(mBitmap, mMatrix, null);
+			canvas.drawBitmap(mBackImage, 0, 0, mPaint);
+
+			canvas.drawBitmap(mEditImage, 0, 0, mEditPaint);
+
+			mHolder.unlockCanvasAndPost(canvas);
+		}
+
+		/**
+		 * 拡大縮小処理
+		 */
+		private SimpleOnScaleGestureListener mOnScaleListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+			@Override
+			public boolean onScaleBegin(ScaleGestureDetector detector) {
+				Log.i(TAG, "scale begin");
+				return super.onScaleBegin(detector);
+			}
+
+			@Override
+			public void onScaleEnd(ScaleGestureDetector detector) {
+				Log.i(TAG, "scale end");
+				super.onScaleEnd(detector);
+			}
+
+			@Override
+			public boolean onScale(ScaleGestureDetector detector) {
+				mScale *= detector.getScaleFactor();
+				return true;
+			};
 		};
-	};
 
-	/**
-	 * 移動処理
-	 */
-	private TranslationGestureListener mTranslationListener = new TranslationGestureListener() {
-		@Override
-		public void onTranslationEnd(TranslationGestureDetector detector) {
-			Log.i(TAG, "translation end:" + detector.getX() + ","
-					+ detector.getY());
-		}
+		/**
+		 * 移動処理
+		 */
+		private TranslationGestureListener mTranslationListener = new TranslationGestureListener() {
+			@Override
+			public void onTranslationEnd(TranslationGestureDetector detector) {
+				Log.i(TAG, "translation end:" + detector.getX() + ","
+						+ detector.getY());
+			}
 
-		@Override
-		public void onTranslationBegin(TranslationGestureDetector detector) {
-			Log.i(TAG, "translation begin:" + detector.getX() + ","
-					+ detector.getY());
-		}
+			@Override
+			public void onTranslationBegin(TranslationGestureDetector detector) {
+				Log.i(TAG, "translation begin:" + detector.getX() + ","
+						+ detector.getY());
+			}
 
-		@Override
-		public void onTranslation(TranslationGestureDetector detector) {
-			mTranslateX += detector.getDeltaX();
-			mTranslateY += detector.getDeltaY();
-		}
-	};
+			@Override
+			public void onTranslation(TranslationGestureDetector detector) {
+				mTranslateX += detector.getDeltaX();
+				mTranslateY += detector.getDeltaY();
+			}
+		};
 
-	/**
-	 * 回転処理
-	 */
-	private RotationGestureListener mRotationListener = new RotationGestureListener() {
-		@Override
-		public void onRotation(RotationGestureDetector detector) {
-			mAngle += detector.getDeltaAngle();
-		}
+		/**
+		 * 回転処理
+		 */
+		private RotationGestureListener mRotationListener = new RotationGestureListener() {
+			@Override
+			public void onRotation(RotationGestureDetector detector) {
+				mAngle += detector.getDeltaAngle();
+			}
 
-		@Override
-		public void onRotationBegin(RotationGestureDetector detector) {
-			Log.i(TAG, "rotation begin");
-		}
+			@Override
+			public void onRotationBegin(RotationGestureDetector detector) {
+				Log.i(TAG, "rotation begin");
+			}
 
-		@Override
-		public void onRotationEnd(RotationGestureDetector detector) {
-			Log.i(TAG, "rotation end");
-		}
-	};
-}
-
-	  
-	  
+			@Override
+			public void onRotationEnd(RotationGestureDetector detector) {
+				Log.i(TAG, "rotation end");
+			}
+		};
 	}
+
+}
