@@ -3,6 +3,7 @@ package com.kabe.donhackday2014;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,21 +28,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.kabe.donhackday2014.view.CameraWipeView;
 
 public class TakePhotoActivity extends Activity {
-	private Handler mHandler = new Handler();
 	private ImageView mImageView;
 	private Camera mCam;
 	private CameraWipeView mCamView;
 	private FrameLayout mFrame;
 	private Bitmap mMaskBitmap;
 	private Bitmap mResultBitmap;
-	private ImageButton mImageButton;
+	private View mImageButton;
 
 	public static Bitmap resizeBitmapToDisplaySize(Activity activity,
 			Bitmap src, float toWidth, float toHeight) {
@@ -111,18 +110,28 @@ public class TakePhotoActivity extends Activity {
 		src = null;
 		return dst;
 	}
+	private View mRelativeLight;
+	
+	private void setupCamera() {
+		if (mCam != null) {
+			mCam.release();
+		}
+		mCam = Camera.open(CameraInfo.CAMERA_FACING_BACK);
+		mCam.setDisplayOrientation(90);
+		mCamView.setCamera(mCam);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_takephoto);
 		getActionBar().hide();
-		mCam = Camera.open(CameraInfo.CAMERA_FACING_BACK);
-		mCam.setDisplayOrientation(90);
+		mCamView = new CameraWipeView(this);
+		setupCamera();
 		// mCam.setPreviewCallback(mPreviewCallback);
-		mCamView = new CameraWipeView(this, mCam);
 		mFrame = (FrameLayout) findViewById(R.id.frame);
 		mFrame.addView(mCamView);
+		mRelativeLight = findViewById(R.id.relative_light);
 
 		mImageView = (ImageView) findViewById(R.id.image);
 		// mMaskBitmap = resizeBitmapToDisplaySize(this,
@@ -131,11 +140,14 @@ public class TakePhotoActivity extends Activity {
 
 		// R.drawable.backlayer_mask));
 
-		mImageButton = (ImageButton) findViewById(R.id.imageButton);
+		mImageButton = findViewById(R.id.imageButton);
 		mImageButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
+				ObjectAnimator anim = ObjectAnimator.ofFloat(mRelativeLight, "alpha", 0f, 1f);
+				anim.setDuration(1000);
+				anim.start();
 				playFromMediaPlayer(SOUND_SHOOT, mShootCompletionListener);
 
 			}
@@ -234,12 +246,14 @@ public class TakePhotoActivity extends Activity {
 			mCam.reconnect();
 		} catch (IOException e) {
 		}
-		// playFromMediaPlayer(SOUND_READY);
+		playFromMediaPlayer(SOUND_READY, null);
 	}
 
 	private MediaPlayer mMediaPlayer;
-	private final int SOUND_READY = R.raw.ta_ge_doramu_s01;
-	private final int SOUND_SHOOT = R.raw.kyaa1;
+//	private final int SOUND_READY = R.raw.katanochikara;
+//	private final int SOUND_SHOOT = R.raw.sukitteiinayo;
+	private final int SOUND_READY = R.raw.se_033a;
+	private final int SOUND_SHOOT = R.raw.se_033a;
 	private final int SOUND_SHUTTER = R.raw.se_033a;
 
 	/**
@@ -299,19 +313,41 @@ public class TakePhotoActivity extends Activity {
 				mResultBitmap = Bitmap.createBitmap(mResultBitmap, 0, 0,
 						mResultBitmap.getWidth(), mResultBitmap.getHeight(), m,
 						true);
+				DisplayMetrics dm = new DisplayMetrics();
+				getWindowManager().getDefaultDisplay().getMetrics(dm);
+				int height = dm.heightPixels;
+				int width = dm.widthPixels;
+				mResultBitmap = Bitmap.createScaledBitmap(mResultBitmap, width, height, true);
 
-				mMaskBitmap = resizeBitmapToDisplaySize(TakePhotoActivity.this,
+				mMaskBitmap = Bitmap.createScaledBitmap(
 						BitmapFactory.decodeResource(getResources(),
-								R.drawable.face_yoko_mask), mResultBitmap.getWidth(), mResultBitmap.getHeight());
+								R.drawable.mask_test),
+								width, height, true);
+//
+//				mMaskBitmap = resizeBitmapToDisplaySize(TakePhotoActivity.this,
+//						BitmapFactory.decodeResource(getResources(),
+//								R.drawable.face_yoko_mask), mResultBitmap.getWidth(), mResultBitmap.getHeight());
 
 				try {
 					maskAndSetImage(mResultBitmap, mMaskBitmap);
+/*					mCam.startPreview();
+					mHandler.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							takePhoto2();
+						}
+					}, 200);*/
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+
 			}
 		}
 	};
+	
+	private Handler mHandler = new Handler();
+	
 	private ShutterCallback mShutterCallback = new ShutterCallback() {
 		@Override
 		public void onShutter() {
