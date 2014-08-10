@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 public class MainActivity extends Activity implements OnClickListener {
-	Button ko;
+	Button ko, ko2;
 	Button arichi;
 	Button  ges;
 	@Override
@@ -30,6 +30,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		// buttonを取得
 		ko = (Button) findViewById(R.id.button1);
 		ko.setOnClickListener(this);
+		ko2 = (Button) findViewById(R.id.button3);
+		ko2.setOnClickListener(this);
 		// buttonを取得
 		arichi = (Button) findViewById(R.id.button2);
 		arichi.setOnClickListener(this);
@@ -83,7 +85,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
 		}
-
+		else if(v == ko2){
+			Intent intent = new Intent(getApplicationContext(),SlideMangaActivity.class);		
+			intent.setAction(Intent.ACTION_VIEW);
+			startActivity(intent);
+		}
 	}
 
 }
