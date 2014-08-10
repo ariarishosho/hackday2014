@@ -353,7 +353,9 @@ public class TakePhotoActivity extends Activity {
 						mHandler.postDelayed(new Runnable() {
 							@Override
 							public void run() {
-								takePhoto2();
+								playFromMediaPlayer(getPhotoShootSound(),
+										mShootCompletionListener);
+//								takePhoto2();
 							}
 						}, 200);
 					}
