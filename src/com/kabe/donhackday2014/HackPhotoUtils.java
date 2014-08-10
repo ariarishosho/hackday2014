@@ -54,6 +54,10 @@ public class HackPhotoUtils {
 
 	public static void takePhoto(Context context, Bitmap bm, int number)
 			throws IOException {
+		// DEMO用
+//		if (true){
+//			return;
+//		}
 
 		final String SAVE_DIR = "/MyPhoto/";
 		File file = new File(Environment.getExternalStorageDirectory()
