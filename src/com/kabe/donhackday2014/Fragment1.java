@@ -1,5 +1,7 @@
 package com.kabe.donhackday2014;
 
+import java.io.IOException;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,21 +23,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.kabe.donhackday2014.Fragment0.MySurfaceView;
 import com.kabe.donhackday2014Gesture.RotationGestureDetector;
 import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
 import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
-public class Fragment1  extends Fragment {
+public class Fragment1  extends HackFragment {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
 	Button button;
+	
+	public void saveResultBitmap() {
+		mSurfaceView.saveBitmap();
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return new MySurfaceView(getActivity().getApplicationContext());
+		mSurfaceView = new MySurfaceView(getActivity().getApplicationContext());
+		return mSurfaceView;
 	}
 
 	public Bitmap resizeBitmapToDisplaySize(Bitmap src) {
@@ -79,6 +87,7 @@ public class Fragment1  extends Fragment {
 		private Bitmap mBitmap;
 		private Bitmap mBackImage;
 		private Bitmap mEditImage;
+		private Bitmap mResultImage;
 		private SurfaceHolder mHolder;
 		private Matrix mMatrix;
 		private Paint mPaint;
@@ -90,6 +99,14 @@ public class Fragment1  extends Fragment {
 		private RotationGestureDetector mRotationGestureDetector;
 		private TranslationGestureDetector mTranslationGestureDetector;
 		private ScaleGestureDetector mScaleGestureDetector;
+		
+		public void saveBitmap() {
+			try {
+				HackPhotoUtils.takePhoto(getContext(), mResultImage, 11);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		public MySurfaceView(Context context) {
 			super(context);
@@ -139,6 +156,7 @@ public class Fragment1  extends Fragment {
 			mTranslateY = 368;
 			mAngle = -6.5f;
 			present();
+			saveBitmap();
 		}
 
 		@Override
@@ -158,11 +176,19 @@ public class Fragment1  extends Fragment {
 		public boolean onTouch(View v, MotionEvent event) {
 			if (event.getX() < 200 && event.getY() < 100) {
 				if (edit) {
-					edit = false;
-					mEditPaint.setAlpha(255);
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_UP:
+						edit = false;
+						mEditPaint.setAlpha(255);
+						break;
+					}
 				} else {
-					edit = true;
-					mEditPaint.setAlpha(80);
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_UP:
+						edit = true;
+						mEditPaint.setAlpha(80);
+						break;
+					}
 				}
 			} else if (edit) {
 				mRotationGestureDetector.onTouchEvent(event);
@@ -179,6 +205,14 @@ public class Fragment1  extends Fragment {
 				}
 			}
 			present();
+			if (edit) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_UP:
+					saveBitmap();
+					break;
+				}
+
+			}
 			return true;
 		}
 
@@ -187,6 +221,9 @@ public class Fragment1  extends Fragment {
 		 */
 		public void present() {
 			Canvas canvas = mHolder.lockCanvas();
+			
+			mResultImage = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvasResult = new Canvas(mResultImage);
 
 			mMatrix.reset();
 			mMatrix.postScale(mScale, mScale);
@@ -195,10 +232,18 @@ public class Fragment1  extends Fragment {
 			mMatrix.postRotate(mAngle);
 			mMatrix.postTranslate(mTranslateX, mTranslateY);
 
-			canvas.drawColor(Color.BLACK);
+			canvasResult.drawColor(Color.BLACK);
+			canvasResult.drawBitmap(mBitmap, mMatrix, null);
+			canvasResult.drawBitmap(mBackImage, 0, 0, mPaint);
+
+
+			/*canvas.drawColor(Color.BLACK);
 			canvas.drawBitmap(mBitmap, mMatrix, null);
 			canvas.drawBitmap(mBackImage, 0, 0, mPaint);
 
+			canvas.drawBitmap(mEditImage, 0, 0, mEditPaint);
+*/
+			canvas.drawBitmap(mResultImage, 0, 0, null);
 			canvas.drawBitmap(mEditImage, 0, 0, mEditPaint);
 
 			mHolder.unlockCanvasAndPost(canvas);
