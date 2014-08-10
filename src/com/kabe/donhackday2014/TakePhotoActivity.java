@@ -3,8 +3,11 @@ package com.kabe.donhackday2014;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -112,6 +115,7 @@ public class TakePhotoActivity extends Activity {
 	}
 
 	private View mRelativeLight;
+	private View mRootView;
 
 	private void setupCamera() {
 		if (mCam != null) {
@@ -126,6 +130,7 @@ public class TakePhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_takephoto);
+		mRootView = findViewById(R.id.container);
 		getActionBar().hide();
 		mCamView = new CameraWipeView(this);
 		setupCamera();
@@ -145,7 +150,8 @@ public class TakePhotoActivity extends Activity {
 		mImageButton.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View v) {
+				v.setEnabled(false);
 				ObjectAnimator anim = ObjectAnimator.ofFloat(mRelativeLight,
 						"alpha", 0f, 1f);
 				anim.setDuration(1000);
@@ -303,10 +309,10 @@ public class TakePhotoActivity extends Activity {
 				takePhoto2();
 				// HackPhotoUtils.takePhoto(TakePhotoActivity.this,
 				// mResultBitmap);
-				Toast.makeText(TakePhotoActivity.this, "撮影完了！",
-						Toast.LENGTH_SHORT).show();
+//				Toast.makeText(TakePhotoActivity.this, "撮影完了！",
+//						Toast.LENGTH_SHORT).show();
 			} catch (Exception e) {
-				Toast.makeText(TakePhotoActivity.this, "保存できない！！",
+				Toast.makeText(TakePhotoActivity.this, "ERROR!保存できない！！",
 						Toast.LENGTH_SHORT).show();
 			}
 
@@ -321,6 +327,10 @@ public class TakePhotoActivity extends Activity {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			if (data != null) {
+				ObjectAnimator animator = ObjectAnimator.ofFloat(mRootView, "alpha", 0, 1);
+				animator.setDuration(1000);
+				animator.start();
+
 				mResultBitmap = BitmapFactory.decodeByteArray(data, 0,
 						data.length);
 				Matrix m = new Matrix();
@@ -355,9 +365,43 @@ public class TakePhotoActivity extends Activity {
 							public void run() {
 								playFromMediaPlayer(getPhotoShootSound(),
 										mShootCompletionListener);
-//								takePhoto2();
 							}
 						}, 200);
+					} else {
+						Toast.makeText(TakePhotoActivity.this, "本日の壁ドン漫画が完成しました！", Toast.LENGTH_SHORT).show();
+						animator = ObjectAnimator.ofFloat(mRootView, "alpha", 1, 0);
+						animator.setDuration(1000);
+						animator.addListener(new AnimatorListener() {
+							
+							@Override
+							public void onAnimationStart(Animator animation) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							@Override
+							public void onAnimationRepeat(Animator animation) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							@Override
+							public void onAnimationEnd(Animator animation) {
+								// TODO Auto-generated method stub
+								Intent intent = new Intent(getApplicationContext(), MainActivity.class);		
+								intent.setAction(MainActivity.ACTION_COMPLETE_PHOTOSHOOT);
+								startActivity(intent);
+								finish();
+
+							}
+							
+							@Override
+							public void onAnimationCancel(Animator animation) {
+								// TODO Auto-generated method stub
+								
+							}
+						});
+						animator.start();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
