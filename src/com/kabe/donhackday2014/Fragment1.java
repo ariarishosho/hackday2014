@@ -232,7 +232,7 @@ public class Fragment1  extends HackFragment {
 			mMatrix.postRotate(mAngle);
 			mMatrix.postTranslate(mTranslateX, mTranslateY);
 
-			canvasResult.drawColor(Color.BLACK);
+			canvasResult.drawColor(Color.WHITE);
 			canvasResult.drawBitmap(mBitmap, mMatrix, null);
 			canvasResult.drawBitmap(mBackImage, 0, 0, mPaint);
 
