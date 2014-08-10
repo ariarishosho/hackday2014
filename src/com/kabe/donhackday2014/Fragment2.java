@@ -26,7 +26,7 @@ import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
 import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
-public class Fragment0 extends Fragment {
+public class Fragment2 extends Fragment {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
@@ -102,7 +102,7 @@ public class Fragment0 extends Fragment {
 				// mBitmap = BitmapFactory.decodeStream(is);
 				mBitmap = HackPhotoUtils.getHackPhoto();
 				mBackImage = BitmapFactory.decodeResource(getResources(),
-						R.drawable.majichu01);
+						R.drawable.majichu03);
 				mEditImage = BitmapFactory.decodeResource(getResources(),
 						R.drawable.edit);
 			} catch (Exception e) {
