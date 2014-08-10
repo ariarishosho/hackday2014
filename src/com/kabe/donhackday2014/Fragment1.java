@@ -100,7 +100,7 @@ public class Fragment1  extends Fragment {
 			try {
 				// is = manager.open("test.png");
 				// mBitmap = BitmapFactory.decodeStream(is);
-				mBitmap = HackPhotoUtils.getHackPhoto();
+				mBitmap = HackPhotoUtils.getHackPhoto(0);
 				mBackImage = BitmapFactory.decodeResource(getResources(),
 						R.drawable.majichu02);
 				mEditImage = BitmapFactory.decodeResource(getResources(),
@@ -135,8 +135,9 @@ public class Fragment1  extends Fragment {
 		public void surfaceChanged(SurfaceHolder holder, int format, int width,
 				int height) {
 			mHolder = holder;
-			mTranslateX = width / 2;
-			mTranslateY = height / 2;
+			mTranslateX = 191;
+			mTranslateY = 368;
+			mAngle = -6.5f;
 			present();
 		}
 
