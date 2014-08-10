@@ -10,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.kabe.donhackday2014.Fragment0.MySurfaceView;
 import com.kabe.donhackday2014Gesture.RotationGestureDetector;
 import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
@@ -35,6 +33,7 @@ public class Fragment1  extends HackFragment {
 	private MySurfaceView mSurfaceView;
 	Button button;
 	
+	@Override
 	public void saveResultBitmap() {
 		mSurfaceView.saveBitmap();
 	}
@@ -57,8 +56,8 @@ public class Fragment1  extends HackFragment {
 		DisplayMetrics metrics = new DisplayMetrics();
 		getActivity().getWindowManager().getDefaultDisplay()
 				.getMetrics(metrics);
-		float screenWidth = (float) metrics.widthPixels;
-		float screenHeight = (float) metrics.heightPixels;
+		float screenWidth = metrics.widthPixels;
+		float screenHeight = metrics.heightPixels;
 		Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
 				+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
 

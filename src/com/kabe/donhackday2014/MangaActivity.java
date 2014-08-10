@@ -1,6 +1,5 @@
 package com.kabe.donhackday2014;
 
-import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
@@ -79,8 +77,8 @@ public class MangaActivity extends Activity implements OnClickListener {
 		Matrix matrix = new Matrix();
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		float screenWidth = (float) metrics.widthPixels;
-		float screenHeight = (float) metrics.heightPixels;
+		float screenWidth = metrics.widthPixels;
+		float screenHeight = metrics.heightPixels;
 		Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
 				+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
 

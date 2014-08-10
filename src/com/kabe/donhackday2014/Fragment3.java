@@ -20,6 +20,7 @@ public class Fragment3 extends HackFragment {
 	private MySurfaceView mSurfaceView;
 	Button button;
 
+	@Override
 	public void saveResultBitmap() {
 		mSurfaceView.saveBitmap();
 	}
@@ -56,8 +57,8 @@ public class Fragment3 extends HackFragment {
 		DisplayMetrics metrics = new DisplayMetrics();
 		getActivity().getWindowManager().getDefaultDisplay()
 				.getMetrics(metrics);
-		float screenWidth = (float) metrics.widthPixels;
-		float screenHeight = (float) metrics.heightPixels;
+		float screenWidth = metrics.widthPixels;
+		float screenHeight = metrics.heightPixels;
 		Log.d(TAG, "screenWidth = " + String.valueOf(screenWidth)
 				+ " px, screenHeight = " + String.valueOf(screenHeight) + " px");
 

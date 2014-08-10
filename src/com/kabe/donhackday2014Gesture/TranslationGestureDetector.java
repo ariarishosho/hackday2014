@@ -1,7 +1,6 @@
 package com.kabe.donhackday2014Gesture;
 
 import android.view.MotionEvent;
-import android.view.View;
 
 public class TranslationGestureDetector {
     private TranslationGestureListener mListener;
