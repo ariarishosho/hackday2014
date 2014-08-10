@@ -19,7 +19,11 @@ import android.provider.MediaStore.Images;
 
 public class HackPhotoUtils {
 	public static Bitmap getHackPhoto() throws IOException {
-		final String fileName = "HACK.png";
+		return getHackPhoto(0);
+	}
+
+	public static Bitmap getHackPhoto(int number) throws IOException {
+		final String fileName = "HACK" + number + ".png";
 		final String SAVE_DIR = "/MyPhoto/";
 		File file = new File(Environment.getExternalStorageDirectory()
 				.getPath() + SAVE_DIR + fileName);
@@ -45,6 +49,11 @@ public class HackPhotoUtils {
 	}
 
 	public static void takePhoto(Context context, Bitmap bm) throws IOException {
+		takePhoto(context, bm, 0);
+	}
+
+	public static void takePhoto(Context context, Bitmap bm, int number)
+			throws IOException {
 
 		final String SAVE_DIR = "/MyPhoto/";
 		File file = new File(Environment.getExternalStorageDirectory()
@@ -58,9 +67,10 @@ public class HackPhotoUtils {
 			throw e;
 		}
 
-//		Date mDate = new Date();
-//		SimpleDateFormat fileNameDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String fileName = "HACK.png";
+		// Date mDate = new Date();
+		// SimpleDateFormat fileNameDate = new
+		// SimpleDateFormat("yyyyMMdd_HHmmss");
+		final String fileName = "HACK" + number + ".png";
 		// String fileName = fileNameDate.format(mDate) + ".png";
 		String AttachName = file.getAbsolutePath() + "/" + fileName;
 

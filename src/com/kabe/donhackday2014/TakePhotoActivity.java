@@ -110,8 +110,9 @@ public class TakePhotoActivity extends Activity {
 		src = null;
 		return dst;
 	}
+
 	private View mRelativeLight;
-	
+
 	private void setupCamera() {
 		if (mCam != null) {
 			mCam.release();
@@ -145,14 +146,27 @@ public class TakePhotoActivity extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				ObjectAnimator anim = ObjectAnimator.ofFloat(mRelativeLight, "alpha", 0f, 1f);
+				ObjectAnimator anim = ObjectAnimator.ofFloat(mRelativeLight,
+						"alpha", 0f, 1f);
 				anim.setDuration(1000);
 				anim.start();
-				playFromMediaPlayer(SOUND_SHOOT, mShootCompletionListener);
-
+				playFromMediaPlayer(getPhotoShootSound(),
+						mShootCompletionListener);
 			}
 		});
 
+	}
+
+	private int mPhotoNum = 0;
+
+	private boolean updatePhotoNum() {
+		mPhotoNum++;
+		mPhotoNum %= 2;
+		return mPhotoNum == 0;
+	}
+
+	private int getPhotoShootSound() {
+		return mPhotoNum == 0 ? SOUND_SHOOT_1 : SOUND_SHOOT_2;
 	}
 
 	private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
@@ -205,7 +219,7 @@ public class TakePhotoActivity extends Activity {
 		mCanvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
 		// mImageView.setImageBitmap(mResultBitmap);
-		HackPhotoUtils.takePhoto(this, mResultBitmap);
+		HackPhotoUtils.takePhoto(this, mResultBitmap, mPhotoNum);
 	}
 
 	//
@@ -250,10 +264,11 @@ public class TakePhotoActivity extends Activity {
 	}
 
 	private MediaPlayer mMediaPlayer;
-//	private final int SOUND_READY = R.raw.katanochikara;
-//	private final int SOUND_SHOOT = R.raw.sukitteiinayo;
-	private final int SOUND_READY = R.raw.se_033a;
-	private final int SOUND_SHOOT = R.raw.se_033a;
+	private final int SOUND_READY = R.raw.katanochikara;
+	// private final int SOUND_SHOOT = R.raw.sukitteiinayo;
+	// private final int SOUND_READY = R.raw.se_033a;
+	private final int SOUND_SHOOT_1 = R.raw.herahera;
+	private final int SOUND_SHOOT_2 = R.raw.tanoshimi;
 	private final int SOUND_SHUTTER = R.raw.se_033a;
 
 	/**
@@ -317,27 +332,31 @@ public class TakePhotoActivity extends Activity {
 				getWindowManager().getDefaultDisplay().getMetrics(dm);
 				int height = dm.heightPixels;
 				int width = dm.widthPixels;
-				mResultBitmap = Bitmap.createScaledBitmap(mResultBitmap, width, height, true);
+				mResultBitmap = Bitmap.createScaledBitmap(mResultBitmap, width,
+						height, true);
 
-				mMaskBitmap = Bitmap.createScaledBitmap(
-						BitmapFactory.decodeResource(getResources(),
-								R.drawable.mask_test),
-								width, height, true);
-//
-//				mMaskBitmap = resizeBitmapToDisplaySize(TakePhotoActivity.this,
-//						BitmapFactory.decodeResource(getResources(),
-//								R.drawable.face_yoko_mask), mResultBitmap.getWidth(), mResultBitmap.getHeight());
+				mMaskBitmap = Bitmap.createScaledBitmap(BitmapFactory
+						.decodeResource(getResources(), R.drawable.mask_test),
+						width, height, true);
+				//
+				// mMaskBitmap =
+				// resizeBitmapToDisplaySize(TakePhotoActivity.this,
+				// BitmapFactory.decodeResource(getResources(),
+				// R.drawable.face_yoko_mask), mResultBitmap.getWidth(),
+				// mResultBitmap.getHeight());
 
 				try {
 					maskAndSetImage(mResultBitmap, mMaskBitmap);
-/*					mCam.startPreview();
-					mHandler.postDelayed(new Runnable() {
-						
-						@Override
-						public void run() {
-							takePhoto2();
-						}
-					}, 200);*/
+					mCam.startPreview();
+					boolean isFinal = updatePhotoNum();
+					if (!isFinal) {
+						mHandler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								takePhoto2();
+							}
+						}, 200);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -345,9 +364,9 @@ public class TakePhotoActivity extends Activity {
 			}
 		}
 	};
-	
+
 	private Handler mHandler = new Handler();
-	
+
 	private ShutterCallback mShutterCallback = new ShutterCallback() {
 		@Override
 		public void onShutter() {
