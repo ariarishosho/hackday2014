@@ -28,7 +28,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		findViewById(R.id.linearManga).setOnClickListener(this);
 
 		// DEBUG用 本番のときは消しましょう！
-		findViewById(R.id.linearTodayKabedon).setVisibility(View.VISIBLE);
+//		findViewById(R.id.linearTodayKabedon).setVisibility(View.VISIBLE);
 
 	}
 
