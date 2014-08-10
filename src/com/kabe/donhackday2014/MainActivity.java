@@ -1,7 +1,6 @@
 package com.kabe.donhackday2014;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 public class MainActivity extends Activity implements OnClickListener {
-	Button ko, ko2;
 	Button arichi;
 	Button  ges;
 	@Override
@@ -23,15 +21,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_main);
 		getActionBar().hide();
 		if (savedInstanceState == null) {
-			getFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+//			getFragmentManager().beginTransaction()
+//					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
 
 		// buttonを取得
-		ko = (Button) findViewById(R.id.button1);
-		ko.setOnClickListener(this);
-		ko2 = (Button) findViewById(R.id.button3);
-		ko2.setOnClickListener(this);
+		findViewById(R.id.imageCamera).setOnClickListener(this);
 		// buttonを取得
 		arichi = (Button) findViewById(R.id.button2);
 		arichi.setOnClickListener(this);
@@ -76,20 +71,21 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if(v == ko){
+		if(v.getId() == R.id.imageCamera){
 			Intent intent = new Intent(getApplicationContext(),TakePhotoActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
+			return;
 		}else if(v == arichi){
-			Intent intent = new Intent(getApplicationContext(), PagerActivity .class);		
+			Intent intent = new Intent(getApplicationContext(), PagerActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
 		}
-		else if(v == ko2){
-			Intent intent = new Intent(getApplicationContext(),SlideMangaActivity.class);		
-			intent.setAction(Intent.ACTION_VIEW);
-			startActivity(intent);
-		}
+//		else if(v == ko2){
+//			Intent intent = new Intent(getApplicationContext(), SlideMangaActivity.class);		
+//			intent.setAction(Intent.ACTION_VIEW);
+//			startActivity(intent);
+//		}
 	}
 
 }

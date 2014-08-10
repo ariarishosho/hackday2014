@@ -46,13 +46,17 @@
             android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
         <activity
-            android:name="com.kacom.kabe.donhackday2014.UIListViewActivity"
+            android:name="com.kabe.donhackday2014.UIListViewActivity"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
-           <activity
+        <activity
             android:name="com.kabe.donhackday2014.PagerActivity"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
-    </application>
+        <activity
+            android:name="com.kabe.donhackday2014.SlideMangaActivity"
+           >
+        </activity>
+        </application>
 
 </manifest>

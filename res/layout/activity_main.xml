@@ -1,9 +1,9 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/title"
+    android:background="@drawable/bg_top"
     tools:context="com.kabe.donhackday2014.MainActivity"
     tools:ignore="MergeRootFrame" >
 
@@ -12,12 +12,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical" >
 
+        <!--
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="ときめきカメラ" />
+        -->
 
         <Button
             android:id="@+id/button2"
@@ -25,6 +27,115 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="ドキドキ" />
+        <!--
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Slide" />
+        -->
     </LinearLayout>
 
-</FrameLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/imageCamera"
+        android:layout_marginBottom="35dp"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#a6da" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:textColor="#aaa"
+                android:textStyle="bold"
+                android:paddingTop="2dp"
+                android:paddingLeft="2dp"
+                android:text="本日の壁ドン漫画" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:text="本日の壁ドン漫画" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/linearManga"
+            android:layout_width="match_parent"
+            android:layout_height="185dp"
+            android:background="#afff"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="5dp" >
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/comic" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="好きっていいなよ。１巻"
+                    android:textColor="#444"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:text="著作：葉月かなえ"
+                    android:textColor="#999"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:text="めいを守るためとキスまでしてきて･･････!?大人気、リアル初恋ストーリー!!"
+                    android:textColor="#999"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:src="@drawable/btn_read" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageCamera"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/icon_camera" >
+    </ImageView>
+
+</RelativeLayout>

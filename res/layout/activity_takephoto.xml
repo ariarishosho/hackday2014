@@ -33,7 +33,7 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"
-        android:src="@drawable/shutter" />
+        android:src="@drawable/btn_camera" />
 
     <RelativeLayout
         android:id="@+id/relative_light"
