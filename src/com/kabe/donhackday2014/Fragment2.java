@@ -178,7 +178,6 @@ public class Fragment2 extends Fragment {
 				case MotionEvent.ACTION_UP:
 					mPaint.setAlpha(255);
 					break;
-
 				}
 			}
 			present();
