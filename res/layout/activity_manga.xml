@@ -3,19 +3,28 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
+
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_margin="30dip"
         android:background="#333333" >
 
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="Button" />
-        
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <android.support.v4.view.PagerTitleStrip
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:background="#CCCCCC"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:textColor="#000000" />
+        </android.support.v4.view.ViewPager>
     </FrameLayout>
+
 </LinearLayout>

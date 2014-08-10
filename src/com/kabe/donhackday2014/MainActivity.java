@@ -79,7 +79,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
 		}else if(v == arichi){
-			Intent intent = new Intent(getApplicationContext(),MangaActivity.class);		
+			Intent intent = new Intent(getApplicationContext(), PagerActivity .class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
 		}
