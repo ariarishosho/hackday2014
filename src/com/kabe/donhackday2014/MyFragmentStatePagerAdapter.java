@@ -17,9 +17,9 @@ public class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
 	    case 0:
 	      return new Fragment0();
 	    case 1:
-	      return new Fragment0();
+	      return new Fragment1();
 	    default:
-	      return new Fragment0();
+	      return new Fragment2();
 	    }
 
 	  }

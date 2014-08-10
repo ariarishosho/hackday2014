@@ -29,7 +29,7 @@ import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
 
 
-public class Fragment0 extends Fragment {
+public class Fragment1 extends Fragment {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
@@ -103,7 +103,8 @@ public class Fragment0 extends Fragment {
 			mBitmap =
 					HackPhotoUtils.getHackPhoto();
 			mBackImage = BitmapFactory.decodeResource(getResources(),
-					R.drawable.majichu01);
+					R.drawable.majichu02);
+	
 		} catch (Exception e) {
 		} finally {
 			// try {
