@@ -1,5 +1,7 @@
 package com.kabe.donhackday2014;
 
+import java.io.IOException;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,21 +23,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.kabe.donhackday2014.Fragment0.MySurfaceView;
 import com.kabe.donhackday2014Gesture.RotationGestureDetector;
 import com.kabe.donhackday2014Gesture.RotationGestureListener;
 import com.kabe.donhackday2014Gesture.TranslationGestureDetector;
 import com.kabe.donhackday2014Gesture.TranslationGestureListener;
 
-public class Fragment2 extends Fragment {
+public class Fragment2 extends HackFragment {
 
 	final static private String TAG = "GestureSample";
 	private MySurfaceView mSurfaceView;
 	Button button;
+	
+	public void saveResultBitmap() {
+		mSurfaceView.saveBitmap();
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return new MySurfaceView(getActivity().getApplicationContext());
+		mSurfaceView = new MySurfaceView(getActivity().getApplicationContext());
+		return mSurfaceView;
 	}
 
 	public Bitmap resizeBitmapToDisplaySize(Bitmap src) {
@@ -79,6 +87,7 @@ public class Fragment2 extends Fragment {
 		private Bitmap mBitmap;
 		private Bitmap mBackImage;
 		private Bitmap mEditImage;
+		private Bitmap mResultImage;
 		private SurfaceHolder mHolder;
 		private Matrix mMatrix;
 		private Paint mPaint;
@@ -90,6 +99,14 @@ public class Fragment2 extends Fragment {
 		private RotationGestureDetector mRotationGestureDetector;
 		private TranslationGestureDetector mTranslationGestureDetector;
 		private ScaleGestureDetector mScaleGestureDetector;
+		
+		public void saveBitmap() {
+			try {
+				HackPhotoUtils.takePhoto(getContext(), mResultImage, 12);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		public MySurfaceView(Context context) {
 			super(context);
@@ -138,6 +155,7 @@ public class Fragment2 extends Fragment {
 			mTranslateX = 345;
 			mTranslateY = 593;
 			present();
+			saveBitmap();
 		}
 
 		@Override
@@ -159,13 +177,19 @@ public class Fragment2 extends Fragment {
 			if (event.getX() < 200 && event.getY() < 100
 					&& (System.currentTimeMillis() - millsec) > 1000) {
 				if (edit) {
-					edit = false;
-					mEditPaint.setAlpha(255);
-					millsec = System.currentTimeMillis();
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_UP:
+						edit = false;
+						mEditPaint.setAlpha(255);
+						break;
+					}
 				} else {
-					edit = true;
-					mEditPaint.setAlpha(80);
-					millsec = System.currentTimeMillis();
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_UP:
+						edit = true;
+						mEditPaint.setAlpha(80);
+						break;
+					}
 				}
 			} else if (edit) {
 				mRotationGestureDetector.onTouchEvent(event);
@@ -177,10 +201,20 @@ public class Fragment2 extends Fragment {
 					break;
 				case MotionEvent.ACTION_UP:
 					mPaint.setAlpha(255);
+					saveBitmap();
 					break;
 				}
 			}
 			present();
+			if (edit) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_UP:
+					saveBitmap();
+					break;
+				}
+
+			}
+
 			return true;
 		}
 
@@ -190,6 +224,9 @@ public class Fragment2 extends Fragment {
 		 */
 		public void present() {
 			Canvas canvas = mHolder.lockCanvas();
+			
+			mResultImage = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvasResult = new Canvas(mResultImage);
 
 			mMatrix.reset();
 			mMatrix.postScale(mScale, mScale);
@@ -197,11 +234,19 @@ public class Fragment2 extends Fragment {
 					-mBitmap.getHeight() / 2 * mScale);
 			mMatrix.postRotate(mAngle);
 			mMatrix.postTranslate(mTranslateX, mTranslateY);
+			
+			canvasResult.drawColor(Color.BLACK);
+			canvasResult.drawBitmap(mBitmap, mMatrix, null);
+			canvasResult.drawBitmap(mBackImage, 0, 0, mPaint);
 
+/*
 			canvas.drawColor(Color.BLACK);
 			canvas.drawBitmap(mBitmap, mMatrix, null);
 			canvas.drawBitmap(mBackImage, 0, 0, mPaint);
 
+			canvas.drawBitmap(mEditImage, 0, 0, mEditPaint);
+			*/
+			canvas.drawBitmap(mResultImage, 0, 0, null);
 			canvas.drawBitmap(mEditImage, 0, 0, mEditPaint);
 
 			mHolder.unlockCanvasAndPost(canvas);
