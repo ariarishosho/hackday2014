@@ -23,7 +23,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-         android:src="@drawable/face_yoko" />
+        android:alpha="0.7"
+        android:scaleType="fitXY"
+        android:src="@drawable/mask_frame" />
     <ImageView
         android:id="@+id/imageButton"
         android:layout_width="70dp"
