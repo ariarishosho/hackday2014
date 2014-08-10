@@ -149,19 +149,22 @@ public class Fragment0 extends Fragment {
 		}
 
 		boolean edit = false;
-
+		long millsec;
 		/**
 		 * タッチ処理
 		 */
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
-			if (event.getX() < 200 && event.getY() < 100) {
+			if (event.getX() < 200 && event.getY() < 100
+					&& (System.currentTimeMillis() - millsec) > 1000) {
 				if (edit) {
 					edit = false;
 					mEditPaint.setAlpha(255);
+					millsec = System.currentTimeMillis();
 				} else {
 					edit = true;
 					mEditPaint.setAlpha(80);
+					millsec = System.currentTimeMillis();
 				}
 			} else if (edit) {
 				mRotationGestureDetector.onTouchEvent(event);
