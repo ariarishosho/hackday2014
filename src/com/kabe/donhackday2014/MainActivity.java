@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 public class MainActivity extends Activity implements OnClickListener {
+	public static final String ACTION_COMPLETE_PHOTOSHOOT = "COMPLETE_PHOTOSHOOT";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -25,6 +26,23 @@ public class MainActivity extends Activity implements OnClickListener {
 		// buttonを取得
 		findViewById(R.id.imageCamera).setOnClickListener(this);
 		findViewById(R.id.linearManga).setOnClickListener(this);
+
+		// DEBUG用 本番のときは消しましょう！
+		findViewById(R.id.linearTodayKabedon).setVisibility(View.VISIBLE);
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent != null && intent.getAction() == ACTION_COMPLETE_PHOTOSHOOT) {
+			findViewById(R.id.linearTodayKabedon).setVisibility(View.VISIBLE);
+		}
 	}
 
 	@Override
