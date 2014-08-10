@@ -86,6 +86,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.imageCamera:
+//			Intent intent = new Intent(getApplicationContext(),SlideMangaActivity.class);		
 			Intent intent = new Intent(getApplicationContext(),TakePhotoActivity.class);		
 			intent.setAction(Intent.ACTION_VIEW);
 			startActivity(intent);
